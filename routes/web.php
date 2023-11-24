@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\UpdateController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,3 +17,11 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('export',[UpdateController::class,'export']);
+Route::get('export_timesheet',[UpdateController::class,'exportTimesheet']);
+Route::get('update',[UpdateController::class,'update']);
+
+// Route::namespace("Api")->prefix('')->group(function () {});
+
+
