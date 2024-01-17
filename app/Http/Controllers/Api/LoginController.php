@@ -68,6 +68,24 @@ class LoginController extends Controller
                         $tablesTitle = array();
                         $users = array();
 
+                        if ($user->role == 1) {
+
+                            $notif = DB::table('app_notif')
+                                ->orderByDesc('id')
+                                ->get();
+                        } else {
+
+                            $notif = DB::table('app_notif')
+                                ->orderByDesc('id')
+                                ->where([
+                                    ['visibility', 'show'],
+                                    ['contact', $user->role],
+                                ])->orWhere([
+                                    ['visibility', 'show'],
+                                    ['contact', 0],
+                                ])
+                                ->get();
+                        }
 
                         if ($user->role < 3) {
                             $roles = DB::table('app_roles')
@@ -111,6 +129,7 @@ class LoginController extends Controller
                             'message' => 'The user is already logged in.',
                             'data' => [
                                 'setting' => $appSetting,
+                                'notif' => $notif,
                                 'user' => $user,
                                 'roles' => $roles,
                                 'cities' => $cities,

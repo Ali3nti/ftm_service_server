@@ -17,7 +17,6 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\WalletController;
 use App\Http\Controllers\Api\WorkReportController;
 use App\Http\Controllers\Dev\DevController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -75,7 +74,7 @@ Route::namespace("Api")->prefix('')->group(function () {
     Route::post('end_shift',           [ShiftEndController::class,     'end']);
     Route::post('failure_shift',       [ShiftEndController::class,     'FailureShift']);
 
-    Route::get('station_status',       [StatusController::class,      'StationStatus']);
+    Route::get('station_status',       [StatusController::class,       'StationStatus']);
 
     Route::post('set_metering',        [MeteringController::class,     'setMetering']);
 
@@ -87,27 +86,30 @@ Route::namespace("Api")->prefix('')->group(function () {
     Route::post('withdrawal_imprest',  [ImprestController::class,      'withdrawalImprest']);
     Route::post('user_transaction',    [ImprestController::class,      'userTransaction']);
     Route::post('buy_request',         [ImprestController::class,      'buyRequest']);
-    Route::post('user_unaccepted_buy_request',  [ImprestController::class, 'userUnacceptedBuyRequest']);
-    Route::post('accepting_buy_request',        [ImprestController::class, 'acceptingBuyRequest']);
+    Route::post('user_unaccepted_buy_request', [ImprestController::class, 'userUnacceptedBuyRequest']);
+    Route::post('accepting_buy_request',       [ImprestController::class, 'acceptingBuyRequest']);
+    Route::post('remove_imprest_transaction',  [ImprestController::class, 'removeImprestTransaction']);
+    Route::post('approve_imprest_transaction', [ImprestController::class, 'approveImprestTransaction']);
+    Route::post('edit_imprest_transaction',    [ImprestController::class, 'editImprestTransaction']);
 
-    Route::get('all_wallet_transaction',        [WalletController::class,  'allWalletTransaction']);
-    Route::get('all_stations_wallet',           [WalletController::class,  'allStationsWallet']);
-    Route::post('user_wallet_transaction',      [WalletController::class,  'userWalletTransaction']);
-    Route::post('station_wallet_transaction',      [WalletController::class,  'stationWalletTransaction']);
-    Route::post('transport_wallet',             [WalletController::class,  'transportWallet']);
-    Route::post('accepting_wallet_transport',   [WalletController::class,  'acceptingWalletTransport']);
+    Route::get('all_wallet_transaction',       [WalletController::class,  'allWalletTransaction']);
+    Route::get('all_stations_wallet',          [WalletController::class,  'allStationsWallet']);
+    Route::post('user_wallet_transaction',     [WalletController::class,  'userWalletTransaction']);
+    Route::post('station_wallet_transaction',  [WalletController::class,  'stationWalletTransaction']);
+    Route::post('transport_wallet',            [WalletController::class,  'transportWallet']);
+    Route::post('accepting_wallet_transport',  [WalletController::class,  'acceptingWalletTransport']);
 });
 
 Route::namespace("Dev")->prefix('')->group(function () {
 
-    Route::get('change_date',                   [DevController::class, 'ChangeDate']);
-    Route::get('id_changer',                    [DevController::class, 'IdChanger']);
-    Route::get('id_report_changer',             [DevController::class, 'IdReportChanger']);
-    Route::get('serialize_operators',           [DevController::class, 'SerializeOperators']);
-    Route::get('tranform_to_report_table',      [DevController::class, 'TranformToReportTable']);
-    Route::get('tranform_to_timesheet_table',   [DevController::class, 'TranformToTimesheetTable']);
-    Route::get('get_station_timesheet',         [DevController::class, 'getStationTimesheet']);
-    Route::get('get_users_timesheet',           [DevController::class, 'getUsersTimesheet']);
-    Route::get('import_shift',                  [DevController::class, 'importShift']);
-    Route::get('set_vecation',                  [DevController::class, 'setVecation']);
+    Route::get('change_date',                  [DevController::class, 'ChangeDate']);
+    Route::get('id_changer',                   [DevController::class, 'IdChanger']);
+    Route::get('id_report_changer',            [DevController::class, 'IdReportChanger']);
+    Route::get('serialize_operators',          [DevController::class, 'SerializeOperators']);
+    Route::get('tranform_to_report_table',     [DevController::class, 'TranformToReportTable']);
+    Route::get('tranform_to_timesheet_table',  [DevController::class, 'TranformToTimesheetTable']);
+    Route::get('get_station_timesheet',        [DevController::class, 'getStationTimesheet']);
+    Route::get('get_users_timesheet',          [DevController::class, 'getUsersTimesheet']);
+    Route::get('import_shift',                 [DevController::class, 'importShift']);
+    Route::get('set_vecation',                 [DevController::class, 'setVecation']);
 });

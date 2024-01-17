@@ -371,63 +371,63 @@ class ImprestController extends Controller
         //     );
         // } else {
 
-            $data['remainder'] = $getUserImprest->remainder;
-            $unacceptedReminder = $getUserImprest->remainder;
+        $data['remainder'] = $getUserImprest->remainder;
+        $unacceptedReminder = $getUserImprest->remainder;
 
-            $userTransactionData = DB::table('app_imprest_transaction')
-                ->orderBy('id')
-                ->where('user_imp', $user_imprest)
-                ->get();
+        $userTransactionData = DB::table('app_imprest_transaction')
+            ->orderBy('id')
+            ->where('user_imp', $user_imprest)
+            ->get();
 
-            $transactions = array();
+        $transactions = array();
 
-            foreach ($userTransactionData as $row) {
-                if ($row->user_req != 0) {
-                    $userName = DB::table('app_users')
-                        ->where('id', $row->user_req)
-                        ->first();
-                    $row->user_req = $userName->first_name . ' ' . $userName->last_name;
-                }
-                if ($row->user_set != 0) {
-                    $userName = DB::table('app_users')
-                        ->where('id', $row->user_set)
-                        ->first();
-                    $row->user_set = $userName->first_name . ' ' . $userName->last_name;
-                }
-                if ($row->user_cnf != 0) {
-                    $userName = DB::table('app_users')
-                        ->where('id', $row->user_cnf)
-                        ->first();
-                    $row->user_cnf = $userName->first_name . ' ' . $userName->last_name;
-                }
-                // if ($row->confirm == '1000') {
-                //     $unacceptedReminder += $row->amount;
-                //     $row->remainder = $unacceptedReminder;
-                // } else {
-                //     $row->remainder = $unacceptedReminder;
-                // }
-                if ($row->img != 'N/A') {
-                    $count = count(scandir($row->img)) - 2;
-                    $row->img = $row->img . $count;
-                }
-                $transactions[] = $row;
+        foreach ($userTransactionData as $row) {
+            if ($row->user_req != 0) {
+                $userName = DB::table('app_users')
+                    ->where('id', $row->user_req)
+                    ->first();
+                $row->user_req = $userName->first_name . ' ' . $userName->last_name;
             }
-
-            if ($userTransactionData) {
-                $data['transaction'] = $transactions;
-                $data['unaccepted_remainder'] = $unacceptedReminder;
-                return $message = array(
-                    'status' => '1',
-                    'message' => 'The tranaction exists',
-                    'data' => $data
-                );
-            } else {
-                return $message = array(
-                    'status' => '0',
-                    'message' => 'The tranaction not found',
-                    'data' => $data
-                );
+            if ($row->user_set != 0) {
+                $userName = DB::table('app_users')
+                    ->where('id', $row->user_set)
+                    ->first();
+                $row->user_set = $userName->first_name . ' ' . $userName->last_name;
             }
+            if ($row->user_cnf != 0) {
+                $userName = DB::table('app_users')
+                    ->where('id', $row->user_cnf)
+                    ->first();
+                $row->user_cnf = $userName->first_name . ' ' . $userName->last_name;
+            }
+            // if ($row->confirm == '1000') {
+            //     $unacceptedReminder += $row->amount;
+            //     $row->remainder = $unacceptedReminder;
+            // } else {
+            //     $row->remainder = $unacceptedReminder;
+            // }
+            if ($row->img != 'N/A') {
+                $count = count(scandir($row->img)) - 2;
+                $row->img = $row->img . $count;
+            }
+            $transactions[] = $row;
+        }
+
+        if ($userTransactionData) {
+            $data['transaction'] = $transactions;
+            $data['unaccepted_remainder'] = $unacceptedReminder;
+            return $message = array(
+                'status' => '1',
+                'message' => 'The tranaction exists',
+                'data' => $data
+            );
+        } else {
+            return $message = array(
+                'status' => '0',
+                'message' => 'The tranaction not found',
+                'data' => $data
+            );
+        }
         // }
     }
     public function userUnacceptedBuyRequest(Request $request)
@@ -469,7 +469,7 @@ class ImprestController extends Controller
                         ->first();
                     $row->user_cnf = $userName->first_name . ' ' . $userName->last_name;
                 }
-            
+
                 if ($row->img != 'N/A') {
                     $count = count(scandir($row->img)) - 2;
                     $row->img = $row->img . $count;
@@ -538,5 +538,134 @@ class ImprestController extends Controller
             'message' => 'Timesheet is returned',
             'data' => $data
         );
+    }
+
+    public function removeImprestTransaction(Request $request)
+    {
+        $user_remover = $request->user_remover;
+        $id           = $request->id;
+
+        $getTransaction = DB::table('app_imprest_transaction')
+            ->where('id', $id)
+            ->first();
+
+        $getUserImprest = DB::table('app_imprest')
+            ->where('user_id', $getTransaction->user_imp)
+            ->first();
+
+        $updateImprest = DB::table('app_imprest')
+            ->where('user_id', $getTransaction->user_imp)
+            ->update([
+                'remainder' => $getUserImprest->remainder - $getTransaction->amount
+            ]);
+
+        $updateTransaction = DB::table('app_imprest_transaction')
+            ->where('id', $id)
+            ->update(['confirm' => '0001']);
+
+        if ($updateImprest && $updateTransaction) {
+            $getNewUserImprest = DB::table('app_imprest')
+                ->where('user_id', $getTransaction->user_imp)
+                ->first();
+
+            return $message = array(
+                'status' => '1',
+                'message' => 'removed seccesfully',
+                'data' =>  $getNewUserImprest->remainder
+            );
+        } else {
+            return $message = array(
+                'status' => '0',
+                'message' => 'removed has error',
+                'data' =>  $getUserImprest
+            );
+        }
+    }
+
+    public function approveImprestTransaction(Request $request)
+    {
+        $user_approver = $request->user_approver;
+        $id            = $request->id;
+
+        $create_date  = jdate();
+
+        $getTransaction = DB::table('app_imprest_transaction')
+            ->where('id', $id)
+            ->first();
+
+        $updateTransaction = DB::table('app_imprest_transaction')
+            ->where('id', $id)
+            ->update([
+                'confirm' => '1111',
+                'accounting_date' => $create_date
+            ]);
+
+        if ($updateTransaction) {
+
+            return $message = array(
+                'status' => '1',
+                'message' => 'approving seccesfully'
+            );
+        } else {
+            return $message = array(
+                'status' => '0',
+                'message' => 'approving has error'
+            );
+        }
+    }
+
+    public function editImprestTransaction(Request $request)
+    {
+        $user_editor     = $request->user_editor;
+        $user_imp     = $request->user_imp;
+        $id          = $request->id;
+        $date        = $request->date;
+        $place       = $request->place;
+        $amount      = $request->amount;
+        $comment     = $request->comment;
+        $description = $request->description;
+
+        $edit_date  = jdate();
+
+        $getUserEditor = DB::table('app_users')
+            ->where('id', $user_editor)
+            ->first();
+
+        $getUserImprest = DB::table('app_imprest')
+            ->where('user_id', $user_imp)
+            ->first();
+
+        $updateImprest = DB::table('app_imprest')
+            ->where('user_id', $user_imp)
+            ->update([
+                'remainder' => $getUserImprest->remainder - $amount
+            ]);
+
+        $updateTransaction = DB::table('app_imprest_transaction')
+            ->where('id', $id)
+            ->update([
+                'date' => $date,
+                'place' => $place,
+                'amount' => $amount,
+                'comment' => $comment
+                    . " /n" . 'ویرایش توسط: ' . $getUserEditor->first_name . " " . $getUserEditor->last_name
+                    . "/n" . '(' . $edit_date . ')',
+                'desc' => $description,
+                'date' => $date,
+                'confirm' => '1110',
+            ]);
+
+        if ($updateImprest && $updateTransaction) {
+
+            return $message = array(
+                'status' => '1',
+                'message' => 'edited seccesfully',
+            );
+        } else {
+            return $message = array(
+                'status' => '0',
+                'message' => 'editing has error',
+            );
+        }
     }
 }
