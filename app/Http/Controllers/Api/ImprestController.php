@@ -545,6 +545,8 @@ class ImprestController extends Controller
         $user_remover = $request->user_remover;
         $id           = $request->id;
 
+        $edit_date  = jdate();
+
         $getTransaction = DB::table('app_imprest_transaction')
             ->where('id', $id)
             ->first();
@@ -556,7 +558,8 @@ class ImprestController extends Controller
         $updateImprest = DB::table('app_imprest')
             ->where('user_id', $getTransaction->user_imp)
             ->update([
-                'remainder' => $getUserImprest->remainder - $getTransaction->amount
+                'remainder' => $getUserImprest->remainder - $getTransaction->amount,
+                'update_date' => $edit_date
             ]);
 
         $updateTransaction = DB::table('app_imprest_transaction')
@@ -589,10 +592,6 @@ class ImprestController extends Controller
 
         $create_date  = jdate();
 
-        $getTransaction = DB::table('app_imprest_transaction')
-            ->where('id', $id)
-            ->first();
-
         $updateTransaction = DB::table('app_imprest_transaction')
             ->where('id', $id)
             ->update([
@@ -616,14 +615,13 @@ class ImprestController extends Controller
 
     public function editImprestTransaction(Request $request)
     {
-        $user_editor     = $request->user_editor;
-        $user_imp     = $request->user_imp;
         $id          = $request->id;
         $date        = $request->date;
         $place       = $request->place;
         $amount      = $request->amount;
         $comment     = $request->comment;
         $description = $request->description;
+        $user_editor = $request->user_editor;
 
         $edit_date  = jdate();
 
@@ -631,14 +629,21 @@ class ImprestController extends Controller
             ->where('id', $user_editor)
             ->first();
 
-        $getUserImprest = DB::table('app_imprest')
-            ->where('user_id', $user_imp)
+        $getTransaction = DB::table('app_imprest_transaction')
+            ->where('id', $id)
             ->first();
 
+        $getUserImprest = DB::table('app_imprest')
+            ->where('user_id', $getTransaction->user_imp)
+            ->first();
+
+        $dif = $getTransaction->amount - $amount;
+
         $updateImprest = DB::table('app_imprest')
-            ->where('user_id', $user_imp)
+            ->where('user_id', $getTransaction->user_imp)
             ->update([
-                'remainder' => $getUserImprest->remainder - $amount
+                'remainder' => $getUserImprest->remainder - $dif,
+                'update_date' => $edit_date
             ]);
 
         $updateTransaction = DB::table('app_imprest_transaction')
@@ -648,8 +653,8 @@ class ImprestController extends Controller
                 'place' => $place,
                 'amount' => $amount,
                 'comment' => $comment
-                    . " /n" . 'ویرایش توسط: ' . $getUserEditor->first_name . " " . $getUserEditor->last_name
-                    . "/n" . '(' . $edit_date . ')',
+                    . " *** " . 'ویرایش توسط: ' . $getUserEditor->first_name . " " . $getUserEditor->last_name
+                    . " *** " . '(' . $edit_date . ')',
                 'desc' => $description,
                 'date' => $date,
                 'confirm' => '1110',
