@@ -153,14 +153,14 @@ class WalletController extends Controller
 
                 if ($wallet_type == 3) {
                     $updateStationWallet = DB::table('app_wallet_stations')
-                        ->where('id', $wallet_id,)
+                        ->where('id', $wallet_id)
                         ->update([
                             'cash' => $stationWallet->cash + $amount,
                             'update_date' => $create_date
                         ]);
                 } else {
                     $updateStationWallet = DB::table('app_wallet_stations')
-                        ->where('id', $wallet_id,)
+                        ->where('id', $wallet_id)
                         ->update([
                             'pos' => $stationWallet->pos + $amount,
                             'update_date' => $create_date
