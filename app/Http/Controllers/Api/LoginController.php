@@ -91,8 +91,8 @@ class LoginController extends Controller
                             $roles = DB::table('app_roles')
                                 ->get();
 
-                            $cities = DB::table('app_city')
-                                ->get();
+                            // $cities = DB::table('app_city')
+                            //     ->get();
 
                             $stationsList = DB::table('app_stations')
                                 ->whereNot('status', 6)

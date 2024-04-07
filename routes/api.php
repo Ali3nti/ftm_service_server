@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Route;
 Route::namespace("Api")->prefix('')->group(function () {
 
     Route::post('new_futures',         [AppController::class,          'newFutures']);
+    Route::get('get_cities',           [AppController::class,          'getCities']);
 
     Route::post('notification',        [NotificationController::class, 'Notification']);
     Route::post('send_notification',   [NotificationController::class, 'SendNotification']);
