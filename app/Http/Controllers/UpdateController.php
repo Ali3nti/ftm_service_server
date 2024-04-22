@@ -38,9 +38,9 @@ class UpdateController extends Controller
         return view('export');
     }
 
-    public function exportTimesheet()
+    public static function exportTimesheet()
     {
-        function filterData(&$str)
+        function _filterData(&$str)
         {
             $str = preg_replace("/\t/", "\\t", $str);
             $str = preg_replace("/\r?\n/", "\\n", $str);
@@ -113,6 +113,108 @@ class UpdateController extends Controller
 
             $baseExcel .= $excelData;
         }
+
+        header("Content-Type: application/vnd.ms-excel; charset=utf-8");
+        // ini_set("default_charset", "UTF-8");
+        // mb_internal_encoding("UTF-8");
+        // iconv_set_encoding("internal_encoding", "UTF-8");
+        // iconv_set_encoding("output_encoding", "UTF-8");
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+
+        echo $baseExcel;
+        // exit;
+
+    }
+
+    public function exportAllReport(Request $request)
+    {
+        $station = $request->station;
+        $date = $request->date;
+
+        $filename = "lordegan_report_all" . date('Y-m-d') . ".csv";
+
+        
+
+        $baseExcel = implode("\t", array_values(array("گزارش تجمیعی جایگاه لردگان $date"))) . "\n";
+
+        $fields = array('تاریخ', 'کارکرد', 'مجموع فروش', 'کارت خوان', 'نقدی');
+        $excelData = implode("\t", array_values($fields)) . "\n";
+
+
+
+        for ($t = 1; $t <= 12; $t++) {
+
+            $monthlyReport = array();
+
+            $month = ($t < 10) ? "0$t" : "$t";
+            $supervisorReport = array();
+
+            $allShift = DB::table('app_report')
+                ->orderBy('start_at')
+                ->where([['station_id', $station], ['start_at', 'LIKE', "$date-$month%"]])
+                ->get();
+
+            $monthlyReport["date"] = $month;
+            $monthlyReport["function"] = 0;
+            $monthlyReport["total"] = 0;
+            $monthlyReport["total_card_cash"] = 0;
+            $monthlyReport["total_hand_cash"] = 0;
+
+            for ($i = 0; $i < count($allShift); $i++) {
+
+                $res1 = $allShift[$i]->start_at;
+
+                $inDay = array();
+                $day = substr($res1, 8, 2);
+
+                $inDay["function"] = 0;
+                $inDay["total_card_cash"] = 0;
+                $inDay["total_hand_cash"] = 0;
+                for ($j = 0; $j < count($allShift); $j++) {
+                    $res2 = $allShift[$j]->start_at;
+
+                    if (str_contains($res2, $date) & substr($allShift[$j]->start_at, 8, 2) == $day) {
+
+                        $dispensers = json_decode($allShift[$j]->dispensers, true);
+                        $totalShiftFunction = 0;
+
+                        foreach ($dispensers as $dispenser) {
+                            if (@$dispenser["end_1"] != null) {
+                                $totalShiftFunction += $dispenser["end_1"] - $dispenser["start_1"];
+                                $totalShiftFunction += $dispenser["end_2"] - $dispenser["start_2"];
+                            }
+                        }
+                        if ($totalShiftFunction != 0) {
+                            $inDay["function"] += $totalShiftFunction;
+                            $inDay["total_card_cash"] += $allShift[$j]->cash;
+                            $inDay["total_hand_cash"] += ($totalShiftFunction * 6568) - $allShift[$j]->cash;
+                        }
+                    }
+                }
+                $supervisorReport[$day] = $inDay;
+
+            }
+
+            foreach($supervisorReport as $item){
+                
+                $monthlyReport["function"] += $item["function"];
+                $monthlyReport["total_card_cash"] += $item["total_card_cash"];
+                $monthlyReport["total_hand_cash"] += $item["total_hand_cash"];
+            }
+
+            $monthlyReport["total"] = $monthlyReport["function"] * 6568;
+
+            $lineData = array(
+                $monthlyReport["date"],
+                $monthlyReport["function"],
+                $monthlyReport["total"],
+                $monthlyReport["total_card_cash"],
+                $monthlyReport["total_hand_cash"],
+            );
+            // array_walk($lineData, 'filterData');
+            $excelData .= implode("\t", array_values($lineData)) . "\n";
+        }
+        $baseExcel .= $excelData;
 
         header("Content-Type: application/vnd.ms-excel; charset=utf-8");
         // ini_set("default_charset", "UTF-8");

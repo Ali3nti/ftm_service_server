@@ -20,6 +20,7 @@ Route::get('/', function () {
 
 Route::get('export',[UpdateController::class,'export']);
 Route::get('export_timesheet',[UpdateController::class,'exportTimesheet']);
+Route::get('export_all_report',[UpdateController::class,'exportAllReport']);
 Route::get('update',[UpdateController::class,'update']);
 
 // Route::namespace("Api")->prefix('')->group(function () {});
