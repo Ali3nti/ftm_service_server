@@ -95,9 +95,6 @@
           <h1>COMING SOON...</h1>
           <p>This website is under construction.</p>
           <h4>Farzin Tavanesh Mehrsad Co.</p>
-          <?php
-          phpinfo();
-          ?>
         </div>
       </div>
     </div>
