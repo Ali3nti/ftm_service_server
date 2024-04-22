@@ -352,7 +352,7 @@ class ShiftEndController extends Controller
                 $updateFinisherUserStatus = DB::table('app_users')
                     ->where([
                         ['station', $row->station_id],
-                        ['role', '!=', 3]
+                        ['role', '==', 4]
                     ])
                     ->update(['status' => 1]);
 

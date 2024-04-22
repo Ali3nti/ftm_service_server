@@ -11,7 +11,7 @@ class StatusController extends Controller
     public function StationStatus(Request $request)
     {
         $stations = DB::table('app_stations')
-            ->orderBy('status')
+            ->orderByDesc('last_update')
             ->get();
 
         $data = array();
