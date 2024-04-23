@@ -16,7 +16,7 @@ class ImprestController extends Controller
         $date         = $request->date;
         $amount       = $request->amount;
         $place        = $request->place;
-        $type        = $request->type;
+        $type         = $request->type;
         $description  = $request->description;
         $images       = $request->images;
 
@@ -49,6 +49,7 @@ class ImprestController extends Controller
                 'date' => $date,
                 'place' => $place,
                 'desc' => $description,
+                'comment' => "",
                 'type' => $type,
                 'img' => 'N/A',
                 'confirm' => '1110',
