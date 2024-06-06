@@ -133,6 +133,7 @@ class ImprestController extends Controller
                 'user_req' => $user_req,
                 'place' => $place,
                 'desc' => $description,
+                'comment' => "",
                 'confirm' => '1000',
                 'create_date' => $create_date,
             ]);
